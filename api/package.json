@@ -1,0 +1,35 @@
+{
+  "name": "corz-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.16.2",
+    "express": "^4.15.3",
+    "fbkt-clog": "^1.0.5",
+    "pg": "^6.2.2",
+    "pm2": "^2.5.0",
+    "postgraphile": "^4.0.0-beta.3",
+    "postgraphile-plugin-connection-filter": "^1.0.0-beta.0",
+    "postgraphql-hook": "^1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "eslint-config-recommended": "^1.5.0",
+    "lerna": "^2.0.0",
+    "mocha": "^3.2.0",
+    "standard": "^10.0.2"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "standard": {
+    "ignore": [
+      "/dist"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

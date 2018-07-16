@@ -22,5 +22,9 @@ process.env.DATABASE_URL = 'postgres://USER:PASSWORD@localhost/corz'
 ```
 build the db
 ```
+./patches/0010-ice-core/dbMigrationScripts/up-everything.sh
+```
+load the test core
+```
 node ./cmd/loadCore/
 ```

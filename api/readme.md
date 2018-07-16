@@ -1,4 +1,6 @@
-# ice-cores api#
+# ice-cores api #
+
+this is a [postgraphile](https://www.graphile.org/postgraphile/) server to provide a graphql api
 
 ```
 npm i

@@ -9,6 +9,13 @@ import SplitPane from 'react-split-pane';
 
 import createPlotlyComponent from 'react-plotly.js/factory'
 
+import { ApolloClient } from 'apollo-client';
+import { HttpLink } from 'apollo-link-http';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+
+import gql from 'graphql-tag';
+import { Query } from 'react-apollo';
+
 import './App.css';
 import './styles/Resizer.css';
 
@@ -23,6 +30,45 @@ import './styles/searchbox.css';
 import 'react-select/dist/react-select.css';
 
 const Plot = createPlotlyComponent(Plotly);
+
+const client = new ApolloClient({
+  // By default, this client will send queries to the
+  //  `/graphql` endpoint on the same host
+  // Pass the configuration option { uri: YOUR_GRAPHQL_API_URL } to the `HttpLink` to connect
+  // to a different host
+  link: new HttpLink(),
+  cache: new InMemoryCache(),
+});
+
+/*
+const GET_DOGS = gql`
+  {
+    dogs {
+      id
+      breed
+    }
+  }
+`;
+
+const Dogs = ({ onDogSelected }) => (
+  <Query query={GET_DOGS}>
+    {({ loading, error, data }) => {
+      if (loading) return 'Loading...';
+      if (error) return `Error! ${error.message}`;
+
+      return (
+        <select name="dog" onChange={onDogSelected}>
+          {data.dogs.map(dog => (
+            <option key={dog.id} value={dog.breed}>
+              {dog.breed}
+            </option>
+          ))}
+        </select>
+      );
+    }}
+  </Query>
+);
+*/
 
 class App extends Component {
 

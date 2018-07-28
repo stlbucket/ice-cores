@@ -5,13 +5,15 @@ const connection = process.env.DB_CONNECTION_STRING ? process.env.DB_CONNECTION_
   port: process.env.PG_PORT
 }
 
+console.log("connection", connection);
+
 function buildKnexfile () {
   return {
     patch_0_0_1_0_structure: {
       client: 'postgresql',
       connection: connection,
       migrations: {
-        directory: `${__dirname}/migrations/structure`,
+        directory: `${__dirname}\\migrations\\structure`,
         tableName: 'public.knex_migrations_patch_0_0_1_0_structure'
       },
     },
@@ -19,7 +21,7 @@ function buildKnexfile () {
       client: 'postgresql',
       connection: connection,
       migrations: {
-        directory: `${__dirname}/migrations/functions`,
+        directory: `${__dirname}\\migrations\\functions`,
         tableName: 'public.knex_migrations_patch_0_0_1_0_functions'
       },
     },
@@ -27,7 +29,7 @@ function buildKnexfile () {
       client: 'postgresql',
       connection: connection,
       migrations: {
-        directory: `${__dirname}/migrations/views`,
+        directory: `${__dirname}\\migrations\\views`,
         tableName: 'public.knex_migrations_patch_0_0_1_0_views'
       },
     },

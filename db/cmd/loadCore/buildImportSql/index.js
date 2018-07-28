@@ -135,7 +135,7 @@ select
   dpt.id,
   ics.${_.snakeCase(dataPointType)} :: float
 from ${stagingTable} ics
-join corz.core c on c.id = ( select id from core where name = '${iceCoreInfo.name}' )
+join corz.core c on c.id = ( select id from corz.core where name = '${iceCoreInfo.name}' )
 join corz.sample sa on sa.core_id = c.id and sa.top_depth = ics.top_depth :: float
 join corz.series se on se.core_id = c.id
 join corz.data_point_type dpt on dpt.id = se.data_point_type_id

@@ -16,7 +16,7 @@ CREATE VIEW corz.vw_core_summary AS (
     c.id,
     c.name,
     c.location,
-    ( select count(*) from sample where core_id = c.id ) as sample_count,
+    ( select count(*) from corz.sample where core_id = c.id ) as sample_count,
     ( select json_agg(series_name) 
       from ( 
         select 

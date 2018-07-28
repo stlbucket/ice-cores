@@ -31,5 +31,5 @@ FOREIGN KEY ( core_id )
 REFERENCES corz.core( id )
 ON DELETE CASCADE;
 --||--
-CREATE INDEX ON sample(top_depth);
+CREATE INDEX ON corz.sample(top_depth);
 `

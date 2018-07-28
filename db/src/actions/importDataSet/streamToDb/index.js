@@ -6,10 +6,14 @@ const validateHeaderRow = require('./validateHeaderRow');
 
 function streamToDb(workspace){
   const d = Promise.defer();
+  const query = `COPY ${workspace.stagingTable} FROM STDIN CSV DELIMITER E',' HEADER`
+  clog('query', query)
+  let cli;
 
   workspace.importInfo.pgClient()
     .then(client => {
-      return client.query(copyFrom(`COPY ${workspace.stagingTable} FROM STDIN CSV DELIMITER E',' HEADER`));
+      cli = client
+      return client.query(copyFrom(query));
     })
     .then(copyFromStream => {
 
@@ -18,6 +22,7 @@ function streamToDb(workspace){
           stagingTable: workspace.stagingTable
         });
       });
+
       workspace.readStream
         .pipe(copyFromStream);
     });

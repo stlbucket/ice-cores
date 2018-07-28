@@ -1,17 +1,19 @@
+const clog = require('fbkt-clog')
 const Promise = require('bluebird');
 const _ = require('lodash');
+
 
 function buildImportSql(workspace){
   const iceCoreInfo = workspace.importInfo;
   const stagingTable = workspace.stagingTable;
 
+  clog('iceCoreInfo', iceCoreInfo)
+  
   const sql = `
-set search_path to corz_staging, corz, public;
-
-delete from core where name = '${iceCoreInfo.name}';
+delete from corz.core where name = '${iceCoreInfo.name}';
 
 -- core -----------------------------------------------------------------------------------------
-insert into core (
+insert into corz.core (
   name,
   location
 )
@@ -19,7 +21,7 @@ select
   '${iceCoreInfo.name}',
   '${iceCoreInfo.location}'
 where not exists (
-  select id from core where name = '${iceCoreInfo.name}'
+  select id from corz.core where name = '${iceCoreInfo.name}'
 );
 -- end core -------------------------------------------------------------------------------------
 
@@ -39,7 +41,7 @@ $$;
 
 update ${stagingTable}
 set core_id = (
-  select id from core where name = '${iceCoreInfo.name}'
+  select id from corz.core where name = '${iceCoreInfo.name}'
 );
 -- end add core_id to staging table -------------------------------------------------------------
 
@@ -49,14 +51,14 @@ set core_id = (
 ${iceCoreInfo.dataPointTypes.reduce(
   (acc, dataPointType) => {
     return acc.concat(`
-insert into data_point_type (
+insert into corz.data_point_type (
   name
 )
 select
   '${dataPointType}'
 where not exists (
   select id
-  from data_point_type
+  from corz.data_point_type
   where name = '${dataPointType}'
 );
 `)
@@ -71,20 +73,20 @@ where not exists (
 ${iceCoreInfo.dataPointTypes.reduce(
     (acc, dataPointType) => {
       return acc.concat(`
-insert into series (
+insert into corz.series (
   core_id,
   data_point_type_id,
   name
 )
 select
-  ( select id from core where name = '${iceCoreInfo.name}' ),
-  ( select id from data_point_type where name = '${dataPointType}' ),
+  ( select id from corz.core where name = '${iceCoreInfo.name}' ),
+  ( select id from corz.data_point_type where name = '${dataPointType}' ),
   ( select '${dataPointType}' )
 where not exists (
   select id
-  from series
-  where core_id = ( select id from core where name = '${iceCoreInfo.name}' )
-  and data_point_type_id = ( select id from data_point_type where name = '${dataPointType}' )
+  from corz.series
+  where core_id = ( select id from corz.core where name = '${iceCoreInfo.name}' )
+  and data_point_type_id = ( select id from corz.data_point_type where name = '${dataPointType}' )
 );
 `)
     },
@@ -96,7 +98,7 @@ where not exists (
 
 -- sample -------------------------------------------------------------------------------------------
 
-insert into sample (
+insert into corz.sample (
   core_id,
   top_depth,
   bottom_depth,
@@ -109,7 +111,9 @@ select
   bottom_depth :: float,
   top_age :: float,
   bottom_age :: float
-from ${stagingTable};
+from ${stagingTable}
+where core_id = ( select id from corz.core where name = '${iceCoreInfo.name}' )
+;
 
 -- end sample ---------------------------------------------------------------------------------------
 
@@ -119,7 +123,7 @@ from ${stagingTable};
 ${iceCoreInfo.dataPointTypes.reduce(
     (acc, dataPointType) => {
       return acc.concat(`
-insert into data_point (
+insert into corz.data_point (
   sample_id,
   series_id,
   data_point_type_id,
@@ -131,10 +135,10 @@ select
   dpt.id,
   ics.${_.snakeCase(dataPointType)} :: float
 from ${stagingTable} ics
-join core c on c.id = ics.core_id
-join sample sa on sa.core_id = c.id and sa.top_depth = ics.top_depth :: float
-join series se on se.core_id = c.id
-join data_point_type dpt on dpt.id = se.data_point_type_id
+join corz.core c on c.id = ( select id from core where name = '${iceCoreInfo.name}' )
+join corz.sample sa on sa.core_id = c.id and sa.top_depth = ics.top_depth :: float
+join corz.series se on se.core_id = c.id
+join corz.data_point_type dpt on dpt.id = se.data_point_type_id
 where dpt.name = '${dataPointType}';
 `)
     },

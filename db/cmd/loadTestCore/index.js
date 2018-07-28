@@ -2,17 +2,18 @@
 require('../../config')
 const clog = require('fbkt-clog');
 const uuid = require('uuid');
-const buildImportSql = require('./buildImportSql');
 const importDataSet = require('../../src/actions/importDataSet');
 const pgClient = require('../../src/pgClient');
 const getReadStream = require('../_common/getReadStream');
+const buildImportSql = require('../loadCore/buildImportSql');
+const FixData = require('./fixData')
 
 const filename = './testCores/GreenlandIceCoreData.csv';
 // const filename = './testCores/GISP2.csv';
 const importInfo = {
-  name: 'GISP2',
+  // name: 'TEST',
   location: `72°35''46.4"N 38°25''19.1"W`,
-  // name: uuid.v4(),
+  name: uuid.v4(),
   uploadId: uuid.v4(),
   filename: filename,
   stagingSchema: 'corz_staging',
@@ -25,11 +26,13 @@ const importInfo = {
 
 getReadStream(importInfo.filename)
   .then(readStream => {
+
+    const stream = readStream.pipe(new FixData())
+
     const workspace = {
-      readStream: readStream,
+      readStream: stream,
       importInfo: importInfo
     };
-
     return importDataSet(workspace);
   })
   .then(result => {

@@ -11,8 +11,7 @@ DROP FUNCTION IF EXISTS build_test_core();
 `
 
 const upScript = `
-CREATE OR REPLACE FUNCTION corz.build_test_core(
-)
+CREATE OR REPLACE FUNCTION corz.build_test_core()
   RETURNS corz.core AS
 $BODY$
 declare
@@ -45,7 +44,8 @@ begin
     ,_location
   RETURNING * INTO _core
   ;
-
+  RAISE NOTICE 'CREATING CORE: %', _core.name;
+  
   INSERT INTO corz.sample(
     core_id,
     top_depth,
@@ -61,6 +61,7 @@ begin
     ,src.bottom_age
   FROM corz.sample src
   WHERE src.core_id = (select id from corz.core where name = _source_core_name)
+  limit (select sample_count from corz.vw_core_summary where name = _source_core_name) - (random() * 2000)::integer
   ;
 
   FOR _i IN 1.._series_count LOOP
@@ -69,8 +70,9 @@ begin
       name 
     )
     SELECT _dp_type
-    ON CONFLICT
-    DO NOTHING
+    ON CONFLICT(name)
+    DO UPDATE
+    SET name = _dp_type
     RETURNING *
     INTO _data_point_type
     ;
@@ -97,20 +99,16 @@ begin
     )
     SELECT
       src.value * ((random() - 0.5) / 10)
-      ,(
-        select id 
-        from corz.sample 
-        where core_id = _core.id 
-        and top_depth = s.top_depth
-      )
+      ,dest_sample.id
       ,_data_point_type.id
       ,_series.id
     FROM corz.data_point src
-    join corz.sample s on src.sample_id = s.id
-      and s.core_id = (select id from corz.core where name = _source_core_name)
-    join corz.data_point_type dpt on dpt.id = src.data_point_type_id and dpt.name = _src_dp_type_name
-    order by top_depth
-    limit (select sample_count from corz.vw_core_summary where name = _source_core_name) - (random() * 2000)::integer
+    join corz.sample src_sample on src.sample_id = src_sample.id
+    join corz.sample dest_sample on dest_sample.top_depth = src_sample.top_depth
+      and dest_sample.core_id = _core.id
+    join corz.data_point_type dpt on dpt.id = src.data_point_type_id 
+    where src_sample.core_id = (select id from corz.core where name = _source_core_name)
+    and dpt.name = _src_dp_type_name
     ;
     
   END LOOP;

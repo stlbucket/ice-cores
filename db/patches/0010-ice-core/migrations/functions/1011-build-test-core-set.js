@@ -7,29 +7,39 @@ exports.down = function (knex, Promise) {
 }
 
 const downScript = `
-DROP FUNCTION IF EXISTS build_test_core();
+DROP FUNCTION IF EXISTS build_test_core_set(integer);
 `
 
 const upScript = `
--- Function: build_test_core()
+-- Function: build_test_core_set(integer)
 
--- DROP FUNCTION build_test_core();
+-- DROP FUNCTION build_test_core_set(integer);
 
-CREATE OR REPLACE FUNCTION build_test_core(
+CREATE OR REPLACE FUNCTION build_test_core_set(
+  _num integer
 )
-  RETURNS corz.core AS
+  RETURNS integer AS
 $BODY$
 declare
-  _core corz.core;
-begin  
+  _core_count integer;
+begin
+  FOR _core_count IN 1.._num LOOP
+    PERFORM corz.build_test_core();
+  END LOOP;
 
-  return _core;
+  select
+    count(*)
+  into _core_count
+  from corz.core; 
+
+  return _core_count;
 end;
 $BODY$
   LANGUAGE plpgsql VOLATILE STRICT SECURITY DEFINER
   COST 100;
-ALTER FUNCTION build_test_core()
+ALTER FUNCTION build_test_core_set(integer)
   OWNER TO soro;
-GRANT EXECUTE ON FUNCTION build_test_core() TO corz_user;
-REVOKE ALL ON FUNCTION build_test_core() FROM public;
+GRANT EXECUTE ON FUNCTION build_test_core_set(integer) TO corz_user;
+REVOKE ALL ON FUNCTION build_test_core_set(integer) FROM public;
+
 `

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-database="cores"
+database="corz"
 hostname="localhost"
 username="corz"
 echo $database

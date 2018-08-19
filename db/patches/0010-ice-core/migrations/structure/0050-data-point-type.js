@@ -15,7 +15,7 @@ CREATE TABLE corz.data_point_type (
   id uuid UNIQUE NOT NULL DEFAULT uuid_generate_v1(),
   created_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
   updated_at timestamp with time zone NOT NULL DEFAULT current_timestamp,
-  name text NOT NULL,
+  name text NOT NULL UNIQUE CHECK (name <> ''),
 	CONSTRAINT pk_data_point_type PRIMARY KEY ( id )
  );
 --||--
